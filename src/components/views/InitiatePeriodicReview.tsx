@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 import {
   ArrowLeft, Bot, Edit3, RefreshCw, MessageSquare, Paperclip,
   BookOpen, ChevronDown, ChevronUp, Save, Send, FileDown,
-  CheckCircle2, Clock, Sparkles, X, Plus
+  CheckCircle2, Clock, Sparkles, X, Plus, Users
 } from 'lucide-react';
 
 interface QuestionState {
@@ -34,7 +34,7 @@ const INSTRUCTIONS = [
   'Attach supporting evidence (SOPs, reports, screenshots) to relevant questions.',
   'Add comments to provide additional context or flag concerns.',
   'Use "Re-run Agent" to regenerate answers with additional context if needed.',
-  'Submit for review only when all 22 questions have been addressed.',
+  'Submit for review only when all checklist questions have been addressed.',
 ];
 
 export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
@@ -108,6 +108,7 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
     });
   };
 
+  const totalQuestions = PR_QUESTIONS.length;
   const progress = PR_QUESTIONS.filter(q => questions[q.id].status !== 'pending').length;
   const reviewed = PR_QUESTIONS.filter(q => questions[q.id].status === 'reviewed').length;
 
@@ -144,10 +145,10 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Review Progress</p>
-          <p className="text-xs font-bold text-slate-700">{progress}/22 Generated · {reviewed}/22 Reviewed</p>
+          <p className="text-xs font-bold text-slate-700">{progress}/{totalQuestions} Generated · {reviewed}/{totalQuestions} Reviewed</p>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-2">
-          <div className="bg-gradient-to-r from-merck-indigo to-merck-cyan h-2 rounded-full transition-all duration-500" style={{ width: `${(progress / 22) * 100}%` }} />
+          <div className="bg-gradient-to-r from-merck-indigo to-merck-cyan h-2 rounded-full transition-all duration-500" style={{ width: `${(progress / totalQuestions) * 100}%` }} />
         </div>
       </div>
 
@@ -187,9 +188,13 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
                   <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-900 text-white text-xs font-bold flex items-center justify-center">{q.number}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-slate-900 leading-snug">{q.question}</p>
-                    <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <span className="text-[9px] font-bold text-merck-indigo bg-merck-indigo/5 px-2 py-0.5 rounded border border-merck-indigo/10 uppercase tracking-wider">{q.category}</span>
                       <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider", statusColor(s.status))}>{s.status}</span>
+                      <span title={`Reviewer: ${q.reviewerType}`} className="inline-flex max-w-full items-center gap-1 whitespace-normal text-left text-[9px] font-bold text-merck-green bg-merck-green/5 px-2 py-0.5 rounded border border-merck-green/10 uppercase tracking-wider leading-snug">
+                        <Users className="w-3 h-3 flex-shrink-0" />
+                        <span>Reviewer: {q.reviewerType}</span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -335,7 +340,7 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
 
       {/* Footer Actions */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{progress}/22 Complete · {reviewed}/22 Reviewed</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{progress}/{totalQuestions} Complete · {reviewed}/{totalQuestions} Reviewed</p>
         <div className="flex items-center space-x-3">
           <button className="flex items-center space-x-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200 transition-all">
             <Save className="w-3.5 h-3.5" /><span>Save Draft</span>
