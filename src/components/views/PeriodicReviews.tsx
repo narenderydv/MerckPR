@@ -282,7 +282,7 @@ export const PeriodicReviews = () => {
                   </td>
                   <td className="px-8 py-5 text-right">
                     <button onClick={() => setSelectedReviewApp(app)} className="px-4 py-2 text-[10px] font-semibold text-white rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 hover:shadow-lg hover:shadow-merck-indigo/20" style={{ background: 'linear-gradient(135deg, #7B4FB8, #4A2D7A)' }}>
-                       Initiate Review
+                       Open Checklist
                        <ArrowRight className="w-3 h-3" strokeWidth={2} />
                      </button>
                   </td>

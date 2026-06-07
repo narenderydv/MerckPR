@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Application } from '../../types';
 import { Badge } from '../ui/Badge';
 import { PR_QUESTIONS, PRQuestion, ReviewerComment } from '../../constants/prQuestions';
 import { cn } from '../../lib/utils';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft, Bot, Edit3, RefreshCw, MessageSquare, Paperclip,
-  BookOpen, ChevronDown, ChevronUp, Save, Send, FileDown,
+  BookOpen, ChevronDown, ChevronUp, Send, FileDown,
   CheckCircle2, Clock, Sparkles, X, Plus, Users
 } from 'lucide-react';
 
@@ -43,8 +43,22 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
   const [currentGenerating, setCurrentGenerating] = useState(0);
   const [expandedQ, setExpandedQ] = useState<string | null>(null);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
-  const [reviewerName, setReviewerName] = useState('');
+  const [reviewerITQA, setReviewerITQA] = useState('');
+  const [reviewerRDQA, setReviewerRDQA] = useState('');
+  const [reviewerRDQ, setReviewerRDQ] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const clickOutsideExport = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', clickOutsideExport);
+    return () => document.removeEventListener('mousedown', clickOutsideExport);
+  }, []);
 
   const [questions, setQuestions] = useState<Record<string, QuestionState>>(() => {
     const init: Record<string, QuestionState> = {};
@@ -196,7 +210,9 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
                     <p className="text-sm font-bold text-slate-900 leading-snug">{q.question}</p>
                     <div className="flex flex-wrap items-center gap-2 mt-2">
                       <span className="text-[9px] font-bold text-merck-indigo bg-merck-indigo/5 px-2 py-0.5 rounded border border-merck-indigo/10 uppercase tracking-wider">{q.category}</span>
-                      <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider", statusColor(s.status))}>{s.status}</span>
+                      {s.status !== 'ai-generated' && (
+                        <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider", statusColor(s.status))}>{s.status}</span>
+                      )}
                       <span title={`Reviewer: ${q.reviewerType}`} className="inline-flex max-w-full items-center gap-1 whitespace-normal text-left text-[9px] font-bold text-merck-green bg-merck-green/5 px-2 py-0.5 rounded border border-merck-green/10 uppercase tracking-wider leading-snug">
                         <Users className="w-3 h-3 flex-shrink-0" />
                         <span>Reviewer: {q.reviewerType}</span>
@@ -217,6 +233,18 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GenAI Response</span>
                       </div>
                       <div className="flex items-center space-x-2">
+                        <button 
+                          onClick={() => updateQ(q.id, { status: s.status === 'reviewed' ? 'ai-generated' : 'reviewed' })}
+                          className={cn(
+                            "flex items-center space-x-1 px-3 py-1.5 text-[10px] font-bold rounded-lg border transition-all uppercase tracking-wider",
+                            s.status === 'reviewed' 
+                              ? "text-merck-green bg-merck-green/10 border-merck-green/20 hover:bg-merck-green/15" 
+                              : "text-slate-600 bg-slate-50 border-slate-200 hover:bg-slate-100"
+                          )}
+                        >
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>{s.status === 'reviewed' ? 'Reviewed ✓' : 'Mark Reviewed'}</span>
+                        </button>
                         <button onClick={() => updateQ(q.id, { isEditing: !s.isEditing })} className="flex items-center space-x-1 px-3 py-1.5 text-[10px] font-bold text-slate-600 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-all uppercase tracking-wider">
                           <Edit3 className="w-3 h-3" /><span>{s.isEditing ? 'Save' : 'Edit'}</span>
                         </button>
@@ -346,14 +374,44 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
 
       {/* Footer Actions */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{progress}/{totalQuestions} Complete · {reviewed}/{totalQuestions} Reviewed</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{progress}/{totalQuestions} Generated · {reviewed}/{totalQuestions} Reviewed</p>
         <div className="flex items-center space-x-3">
-          <button className="flex items-center space-x-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200 transition-all">
-            <Save className="w-3.5 h-3.5" /><span>Save Draft</span>
-          </button>
-          <button className="flex items-center space-x-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200 transition-all">
-            <FileDown className="w-3.5 h-3.5" /><span>Export PDF</span>
-          </button>
+
+          <div className="relative" ref={exportMenuRef}>
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="flex items-center space-x-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200 transition-all"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              <span>Export</span>
+              <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+            </button>
+            
+            <AnimatePresence>
+              {showExportMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 bottom-full mb-2 w-40 bg-white rounded-xl border border-slate-200 shadow-xl p-1 z-50 origin-bottom-right"
+                >
+                  <button 
+                    onClick={() => { setShowExportMenu(false); alert('Exporting as Excel...'); }}
+                    className="w-full text-left px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:text-merck-indigo hover:bg-slate-50 rounded-lg transition-colors"
+                  >
+                    Export as Excel
+                  </button>
+                  <button 
+                    onClick={() => { setShowExportMenu(false); alert('Exporting as PDF...'); }}
+                    className="w-full text-left px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:text-merck-indigo hover:bg-slate-50 rounded-lg transition-colors"
+                  >
+                    Export as PDF
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           <button 
             onClick={() => setShowSubmitModal(true)}
             className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-merck-indigo to-merck-indigo/90 text-white rounded-xl text-xs font-bold hover:shadow-lg hover:shadow-merck-indigo/20 transition-all duration-300"
@@ -378,20 +436,43 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
               </button>
             </div>
             
-            <div className="space-y-4 mb-8">
+            <div className="space-y-4 mb-8 max-h-[350px] overflow-y-auto pr-1">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reviewer Name</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">ITQA Reviewer</label>
                 <input 
                   type="text" 
-                  value={reviewerName}
-                  onChange={(e) => setReviewerName(e.target.value)}
-                  placeholder="e.g. Dr. Sarah Chen"
+                  value={reviewerITQA}
+                  onChange={(e) => setReviewerITQA(e.target.value)}
+                  placeholder="e.g. John Doe (ITQA)"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-merck-indigo/20 transition-all"
                   autoFocus
                 />
               </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">RDQA Reviewer</label>
+                <input 
+                  type="text" 
+                  value={reviewerRDQA}
+                  onChange={(e) => setReviewerRDQA(e.target.value)}
+                  placeholder="e.g. Alice Smith (RDQA)"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-merck-indigo/20 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">RDQ Reviewer</label>
+                <input 
+                  type="text" 
+                  value={reviewerRDQ}
+                  onChange={(e) => setReviewerRDQ(e.target.value)}
+                  placeholder="e.g. Elena Fisher (RDQ)"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-merck-indigo/20 transition-all"
+                />
+              </div>
+
               <p className="text-xs text-slate-500 leading-relaxed">
-                The assigned reviewer will be notified to review the AI-generated answers and evidence for this Periodic Review.
+                Assign qualified specialists for each section to sign off on their respective question subsets (ITQA, RDQA, and RDQ).
               </p>
             </div>
             
@@ -403,7 +484,7 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
                 Cancel
               </button>
               <button 
-                disabled={!reviewerName.trim() || isSubmitting}
+                disabled={(!reviewerITQA.trim() && !reviewerRDQA.trim() && !reviewerRDQ.trim()) || isSubmitting}
                 onClick={() => {
                   setIsSubmitting(true);
                   setTimeout(() => {
@@ -414,7 +495,7 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
                 }}
                 className={cn(
                   "flex-1 px-4 py-2.5 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center",
-                  reviewerName.trim() && !isSubmitting ? "bg-gradient-to-r from-merck-indigo to-merck-indigo/90 hover:shadow-lg hover:shadow-merck-indigo/20" : "bg-slate-300 cursor-not-allowed"
+                  (reviewerITQA.trim() || reviewerRDQA.trim() || reviewerRDQ.trim()) && !isSubmitting ? "bg-gradient-to-r from-merck-indigo to-merck-indigo/90 hover:shadow-lg hover:shadow-merck-indigo/20" : "bg-slate-300 cursor-not-allowed"
                 )}
               >
                 {isSubmitting ? (

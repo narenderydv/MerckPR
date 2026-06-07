@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, User, Menu, ChevronRight, LogOut, Settings, Clock } from 'lucide-react';
+import { Bell, User, Menu, ChevronRight, LogOut, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -165,22 +165,9 @@ export const Header = ({ onMenuToggle, title, breadcrumb }: HeaderProps) => {
                 >
                   <div className="p-4 border-b border-slate-50">
                     <p className="text-sm font-bold text-slate-900 font-display">Dr. Elena Fisher</p>
-                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-1">ID: EF-700412</p>
-                    <div className="mt-3 flex items-center space-x-2">
-                       <span className="px-2.5 py-0.5 text-merck-indigo text-[9px] font-semibold rounded-full border border-merck-indigo/15 bg-merck-indigo/5">ADMIN</span>
-                       <span className="px-2.5 py-0.5 text-merck-green text-[9px] font-semibold rounded-full border border-merck-green/15 bg-merck-green/5">VERIFIED</span>
-                    </div>
                   </div>
                   <div className="p-1.5">
-                    <button className="w-full flex items-center space-x-3 px-3.5 py-3 hover:bg-slate-50 rounded-xl transition-all group text-slate-500">
-                      <User className="w-4 h-4 group-hover:text-merck-indigo" strokeWidth={1.8} />
-                      <span className="text-xs font-medium group-hover:text-slate-800 transition-colors">Profile</span>
-                    </button>
-                    <button className="w-full flex items-center space-x-3 px-3.5 py-3 hover:bg-slate-50 rounded-xl transition-all group text-slate-500">
-                      <Settings className="w-4 h-4 group-hover:text-merck-indigo" strokeWidth={1.8} />
-                      <span className="text-xs font-medium group-hover:text-slate-800 transition-colors">Settings</span>
-                    </button>
-                    <div className="h-px bg-slate-50 my-1 mx-3" />
+
                     <button className="w-full flex items-center space-x-3 px-3.5 py-3 hover:bg-merck-magenta/[0.03] rounded-xl transition-all group text-slate-400 hover:text-merck-magenta">
                       <LogOut className="w-4 h-4" strokeWidth={1.8} />
                       <span className="text-xs font-medium">Sign Out</span>

@@ -25,7 +25,7 @@ export const PR_QUESTIONS: PRQuestion[] = [
   {
     id: 'PRQ-01',
     number: 1,
-    category: 'Previous Review',
+    category: 'Previous PR report',
     question: 'Review the previous Periodic Review Report for the system or if not available yet, the most recent Validation Report. Verify that any corrective actions from previous PR or open issues listed in the VR have been resolved.*',
     reviewerType: 'RDQ & ITQA',
     aiAnswer: `Previous Year PR report has been reviewed. Last year open Observations has been moved to this year PR record. Criticality of these observations have been raised. References of the observations have been moved to this year record.
