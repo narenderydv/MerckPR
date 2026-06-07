@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Application, PRStatus } from '../../types';
 import { MOCK_APPLICATIONS } from '../../constants/mockData';
 import { Badge } from '../ui/Badge';
-import { Calendar, CheckCircle2, Clock, AlertTriangle, ArrowRight, ClipboardCheck } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { FilterBar } from '../dashboard/FilterBar';
 import { InitiatePeriodicReview } from './InitiatePeriodicReview';
@@ -69,17 +69,6 @@ export const PeriodicReviews = () => {
       transition={{ duration: 0.4 }}
       className="space-y-8 pb-12"
     >
-      <div className="flex justify-between items-end pb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-merck-indigo/10 flex items-center justify-center">
-            <ClipboardCheck className="w-5 h-5 text-merck-indigo" strokeWidth={1.8} />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight font-display">Periodic Reviews</h2>
-            <p className="text-xs text-slate-400 font-medium">Tracking reviews and compliance milestones across global sites</p>
-          </div>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <button 

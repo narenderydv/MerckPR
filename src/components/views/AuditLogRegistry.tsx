@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { MOCK_APPLICATIONS } from '../../constants/mockData';
-import { Download, Search, Calendar, X, ChevronDown, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Download, Search, Calendar, X, ChevronDown, ArrowRight } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { cn } from '../../lib/utils';
 import { Application } from '../../types';
@@ -114,17 +114,8 @@ export const AuditLogRegistry = () => {
       transition={{ duration: 0.4 }}
       className="space-y-8 pb-12"
     >
-      {/* Header */}
-      <div className="flex justify-between items-end pb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-merck-indigo/10 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-merck-indigo" strokeWidth={1.8} />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight font-display">Audit Readiness</h2>
-            <p className="text-xs text-slate-400 font-medium">System audit readiness with compliance and observation metrics</p>
-          </div>
-        </div>
+      {/* Header (Export CSV only, title & icon removed) */}
+      <div className="flex justify-end pb-2">
         <button onClick={handleExport} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-slate-50 transition-all">
           <Download className="w-3.5 h-3.5 opacity-50" strokeWidth={1.8} />
           Export CSV

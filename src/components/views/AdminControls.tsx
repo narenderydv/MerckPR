@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Users, Shield, Key, Bell, Database, 
   ChevronRight, ToggleLeft, ToggleRight,
-  Settings, AlertTriangle
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Badge } from '../ui/Badge';
@@ -41,18 +41,7 @@ export const AdminControls = () => {
       transition={{ duration: 0.4 }}
       className="space-y-8 pb-12"
     >
-      {/* Header */}
-      <div className="flex justify-between items-end pb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-merck-indigo/10 flex items-center justify-center">
-            <Settings className="w-5 h-5 text-merck-indigo" strokeWidth={1.8} />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight font-display">Admin Controls</h2>
-            <p className="text-xs text-slate-400 font-medium">Manage users, roles, permissions and platform settings</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Quick Settings Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

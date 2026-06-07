@@ -6,7 +6,7 @@ import {
   OBSERVATION_CRITICALITY_CHART,
   DASHBOARD_STATS
 } from '../../constants/dashboardData';
-import { BarChart3, TrendingUp, PieChart, Activity, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Activity, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { StatCard } from '../dashboard/StatCard';
 import { ReportsView } from './ReportsView';
 
@@ -15,18 +15,6 @@ export const AnalyticsView = () => {
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-merck-indigo/10 flex items-center justify-center">
-            <BarChart3 className="w-5 h-5 text-merck-indigo" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 font-display">Compliance Analytics</h2>
-            <p className="text-xs text-slate-400 font-medium">Visual insights into review status, observations, and trends</p>
-          </div>
-        </div>
-      </div>
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
