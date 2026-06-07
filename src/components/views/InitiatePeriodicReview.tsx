@@ -135,7 +135,13 @@ export const InitiatePeriodicReview = ({ application, onBack }: Props) => {
             </p>
           </div>
         </div>
-        <Badge variant={application.prStatus === 'Completed' ? 'success' : application.prStatus === 'Pending' ? 'info' : 'danger'}>
+        <Badge variant={
+          application.prStatus === 'Completed' ? 'success' :
+          application.prStatus === 'In Progress' ? 'info' :
+          application.prStatus === 'In Review' ? 'warning' :
+          application.prStatus === 'To be Initiated' ? 'neutral' :
+          'danger'
+        }>
           {application.prStatus}
         </Badge>
       </div>

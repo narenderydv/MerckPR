@@ -8,6 +8,7 @@ import {
 } from '../../constants/dashboardData';
 import { BarChart3, TrendingUp, PieChart, Activity, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { StatCard } from '../dashboard/StatCard';
+import { ReportsView } from './ReportsView';
 
 export const AnalyticsView = () => {
   const [activeSegment, setActiveSegment] = useState('');
@@ -77,6 +78,12 @@ export const AnalyticsView = () => {
 
       {/* Trend Chart */}
       <ObservationTrendChart />
+
+      {/* Divider */}
+      <div className="h-px bg-slate-200/60 my-8" />
+
+      {/* Reports Section */}
+      <ReportsView />
     </div>
   );
 };

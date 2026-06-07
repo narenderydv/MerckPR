@@ -16,8 +16,8 @@ interface FilterBarProps {
 
 export const FilterBar = ({ filters, setFilters, onClear }: FilterBarProps) => {
   const years = ['All Years', '2024', '2025', '2026'];
-  const divisions = ['All Divisions', 'R&D', 'DDIT', 'Quality', 'Commercial', 'Manufacturing', 'Medical'];
-  const prStatuses = ['All Statuses', 'Completed', 'Pending', 'Overdue'];
+  const divisions = ['All Functional Areas', 'R&D', 'DDIT', 'Quality', 'Commercial', 'Manufacturing', 'Medical'];
+  const prStatuses = ['All Statuses', 'To be Initiated', 'In Progress', 'In Review', 'Completed', 'Overdue'];
 
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-100 mb-8" style={{ boxShadow: '0 1px 3px rgba(107,63,160,0.03), 0 4px 16px rgba(107,63,160,0.03)' }}>
@@ -56,7 +56,7 @@ export const FilterBar = ({ filters, setFilters, onClear }: FilterBarProps) => {
                 onChange={(e) => setFilters({ ...filters, division: e.target.value })}
                 className="w-full appearance-none pl-3.5 pr-9 py-2.5 bg-transparent text-xs font-semibold text-slate-600 focus:outline-none cursor-pointer"
               >
-                {divisions.map(d => <option key={d} value={d === 'All Divisions' ? '' : d}>{d}</option>)}
+                {divisions.map(d => <option key={d} value={d === 'All Functional Areas' ? '' : d}>{d}</option>)}
               </select>
               <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" strokeWidth={1.8} />
             </div>

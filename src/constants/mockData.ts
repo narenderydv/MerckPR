@@ -13,7 +13,7 @@ export const MOCK_APPLICATIONS: Application[] = [
     lastAuditDate: '2025-11-12',
     lastAuditType: 'External',
     lastAuditOutcome: 'Minor Findings',
-    prStatus: 'Pending',
+    prStatus: 'In Progress',
     observations: [
       {
         id: 'OBS-01',
@@ -39,7 +39,7 @@ export const MOCK_APPLICATIONS: Application[] = [
       { id: 'AUD-88', date: '2024-06-20', type: 'Internal', outcome: 'No Findings', auditor: 'Global Quality', observations: 0 }
     ],
     prHistory: [
-      { year: 2026, status: 'Pending', observationsCount: 1 },
+      { year: 2026, status: 'In Progress', observationsCount: 1 },
       { year: 2025, status: 'Completed', completionDate: '2025-03-15', observationsCount: 4 }
     ],
     capas: [
@@ -160,10 +160,10 @@ export const MOCK_APPLICATIONS: Application[] = [
     lastAuditDate: '2025-12-01',
     lastAuditType: 'Internal',
     lastAuditOutcome: 'Minor Findings',
-    prStatus: 'Pending',
+    prStatus: 'To be Initiated',
     observations: [],
     auditHistory: [],
-    prHistory: [{ year: 2026, status: 'Pending', observationsCount: 1 }],
+    prHistory: [{ year: 2026, status: 'To be Initiated', observationsCount: 1 }],
     capas: []
   }
 ];

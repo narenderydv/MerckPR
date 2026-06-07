@@ -39,7 +39,7 @@ export const ReportsView = () => {
             <FileBarChart className="w-5 h-5 text-merck-indigo" strokeWidth={1.8} />
           </div>
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight font-display">Global Reports</h2>
+            <h2 className="text-lg font-bold text-slate-900 font-display">Global Reports</h2>
             <p className="text-xs text-slate-400 font-medium">Generate, view and export regulatory compliance reports</p>
           </div>
         </div>

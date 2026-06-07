@@ -4,8 +4,6 @@ import {
   ChevronRight, 
   ExternalLink, 
   FileText, 
-  Search, 
-  Filter,
   MoreVertical,
   Calendar
 } from 'lucide-react';
@@ -24,21 +22,7 @@ export const ApplicationTable = ({ applications, onRowClick }: ApplicationTableP
           <h3 className="text-sm font-bold text-slate-800 tracking-tight font-display">Systems Registry</h3>
           <span className="px-2.5 py-0.5 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-semibold border border-slate-100">{applications.length} records</span>
         </div>
-        
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" strokeWidth={1.8} />
-            <input 
-              type="text" 
-              placeholder="Search registry..." 
-              className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs w-56 focus:outline-none focus:ring-2 focus:ring-merck-indigo/10 transition-all font-medium placeholder:text-slate-300"
-            />
-          </div>
-          <button className="flex items-center space-x-2 px-4 py-2 border border-slate-100 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors">
-            <Filter className="w-3.5 h-3.5" strokeWidth={1.8} />
-            <span>Filters</span>
-          </button>
-        </div>
+
       </div>
 
       <div className="overflow-x-auto">
@@ -46,7 +30,7 @@ export const ApplicationTable = ({ applications, onRowClick }: ApplicationTableP
           <thead>
             <tr className="border-b border-slate-50">
               <th className="px-8 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">System</th>
-              <th className="px-8 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Owner & Division</th>
+              <th className="px-8 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Owner & Functional Area</th>
               <th className="px-8 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Last review Date</th>
               <th className="px-8 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Next Due Date</th>
               <th className="px-8 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">Year</th>
@@ -66,7 +50,7 @@ export const ApplicationTable = ({ applications, onRowClick }: ApplicationTableP
                   <div>
                     <p className="text-sm font-semibold text-slate-800 group-hover:text-merck-indigo transition-colors">{app.name}</p>
                     <div className="flex items-center mt-1 space-x-2">
-                      <span className="text-[10px] font-mono font-medium text-slate-400 tracking-tight">ID: {app.id}</span>
+                      <span className="text-[10px] font-mono font-medium text-slate-400 tracking-tight">BSN ID: {app.id}</span>
                       <span className="text-[9px] bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded-md font-medium border border-slate-100">RDID: {app.rdid}</span>
                     </div>
                   </div>
@@ -97,7 +81,10 @@ export const ApplicationTable = ({ applications, onRowClick }: ApplicationTableP
                 <td className="px-8 py-5 text-center">
                   <Badge variant={
                     app.prStatus === 'Completed' ? 'success' :
-                    app.prStatus === 'Pending' ? 'info' : 'danger'
+                    app.prStatus === 'In Progress' ? 'info' :
+                    app.prStatus === 'In Review' ? 'warning' :
+                    app.prStatus === 'To be Initiated' ? 'neutral' :
+                    'danger'
                   } className="px-3 py-1 font-display">
                     {app.prStatus}
                   </Badge>

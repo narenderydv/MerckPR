@@ -91,7 +91,10 @@ export const SystemDetails = ({ application, onBack }: SystemDetailsProps) => {
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight font-display">{application.name}</h1>
               <Badge variant={
                 application.prStatus === 'Completed' ? 'success' : 
-                application.prStatus === 'Pending' ? 'info' : 'danger'
+                application.prStatus === 'In Progress' ? 'info' : 
+                application.prStatus === 'In Review' ? 'warning' : 
+                application.prStatus === 'To be Initiated' ? 'neutral' : 
+                'danger'
               }>{application.prStatus}</Badge>
             </div>
             <p className="text-xs text-slate-500 font-medium mt-1">

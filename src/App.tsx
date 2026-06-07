@@ -32,7 +32,7 @@ import { cn } from './lib/utils';
 
 import { PeriodicReviews } from './components/views/PeriodicReviews';
 import { AuditLogRegistry } from './components/views/AuditLogRegistry';
-import { ReportsView } from './components/views/ReportsView';
+
 import { SettingsView } from './components/views/SettingsView';
 import { AnalyticsView } from './components/views/AnalyticsView';
 import { AdminControls } from './components/views/AdminControls';
@@ -56,7 +56,9 @@ export default function App() {
       const appYear = app.prHistory?.[0]?.year?.toString() || (app.lastAuditDate ? app.lastAuditDate.substring(0, 4) : '');
       const matchYear = !filters.year || appYear === filters.year;
       const matchDivision = !filters.division || app.division === filters.division;
-      const matchStatus = !filters.prStatus || app.prStatus === filters.prStatus;
+      const matchStatus = !filters.prStatus || 
+        app.prStatus === filters.prStatus || 
+        (filters.prStatus === 'Pending' && ['To be Initiated', 'In Progress', 'In Review'].includes(app.prStatus));
       const searchLower = filters.search.toLowerCase();
       const matchSearch = !filters.search || 
         app.name.toLowerCase().includes(searchLower) || 
@@ -80,11 +82,11 @@ export default function App() {
   const getPageTitle = () => {
     if (selectedApp) return "System Profile";
     switch (activeSection) {
-      case 'dashboard': return "PR Executive Dashboard";
+      case 'dashboard': return "Compliance Dashboard";
       case 'analytics': return "Compliance Analytics";
       case 'reviews': return "Periodic Reviews";
       case 'audits': return "Audit Readiness";
-      case 'reports': return "Global Reports";
+
       case 'admin': return "Admin Controls";
       case 'settings': return "Settings";
       default: return "ReviewIQ";
@@ -110,38 +112,45 @@ export default function App() {
 
   const renderDashboard = () => (
     <div className="space-y-6">
-      {/* View Toggle */}
-      <div className="flex bg-slate-50 p-1 rounded-2xl w-fit border border-slate-100">
-        <button
-          onClick={() => setDashboardView('pr')}
-          className={cn(
-            "px-6 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300",
-            dashboardView === 'pr' 
-              ? "text-white" 
-              : "text-slate-500 hover:text-slate-700 hover:bg-white"
-          )}
-          style={dashboardView === 'pr' ? {
-            background: 'linear-gradient(135deg, #7B4FB8, #4A2D7A)',
-            boxShadow: '0 4px 16px rgba(107,63,160,0.25)'
-          } : undefined}
-        >
-          Periodic Review
-        </button>
-        <button
-          onClick={() => setDashboardView('audit')}
-          className={cn(
-            "px-6 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300",
-            dashboardView === 'audit' 
-              ? "text-white" 
-              : "text-slate-500 hover:text-slate-700 hover:bg-white"
-          )}
-          style={dashboardView === 'audit' ? {
-            background: 'linear-gradient(135deg, #7B4FB8, #4A2D7A)',
-            boxShadow: '0 4px 16px rgba(107,63,160,0.25)'
-          } : undefined}
-        >
-          Audit Readiness
-        </button>
+      {/* View Toggle & Last Refresh */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex bg-slate-50 p-1 rounded-2xl w-fit border border-slate-100">
+          <button
+            onClick={() => setDashboardView('pr')}
+            className={cn(
+              "px-6 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300",
+              dashboardView === 'pr' 
+                ? "text-white" 
+                : "text-slate-500 hover:text-slate-700 hover:bg-white"
+            )}
+            style={dashboardView === 'pr' ? {
+              background: 'linear-gradient(135deg, #7B4FB8, #4A2D7A)',
+              boxShadow: '0 4px 16px rgba(107,63,160,0.25)'
+            } : undefined}
+          >
+            Periodic Review
+          </button>
+          <button
+            onClick={() => setDashboardView('audit')}
+            className={cn(
+              "px-6 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300",
+              dashboardView === 'audit' 
+                ? "text-white" 
+                : "text-slate-500 hover:text-slate-700 hover:bg-white"
+            )}
+            style={dashboardView === 'audit' ? {
+              background: 'linear-gradient(135deg, #7B4FB8, #4A2D7A)',
+              boxShadow: '0 4px 16px rgba(107,63,160,0.25)'
+            } : undefined}
+          >
+            Audit Readiness
+          </button>
+        </div>
+        
+        <div className="flex items-center text-[11px] text-slate-400 font-semibold uppercase tracking-wider bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm w-fit">
+          <Clock className="w-3.5 h-3.5 mr-2 text-slate-400" strokeWidth={2} />
+          <span>Last Refreshed: <span className="text-slate-600 font-bold ml-1">June 7, 2026, 05:00 PM</span></span>
+        </div>
       </div>
 
       {dashboardView === 'pr' ? (
@@ -222,8 +231,7 @@ export default function App() {
         return <PeriodicReviews />;
       case 'audits':
         return <AuditLogRegistry />;
-      case 'reports':
-        return <ReportsView />;
+
       case 'admin':
         return <AdminControls />;
       case 'settings':

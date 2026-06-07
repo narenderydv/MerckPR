@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Application } from '../../types';
+import { Application, PRStatus } from '../../types';
 import { MOCK_APPLICATIONS } from '../../constants/mockData';
 import { Badge } from '../ui/Badge';
 import { Calendar, CheckCircle2, Clock, AlertTriangle, ArrowRight, ClipboardCheck } from 'lucide-react';
@@ -9,6 +9,7 @@ import { InitiatePeriodicReview } from './InitiatePeriodicReview';
 import { motion } from 'motion/react';
 
 export const PeriodicReviews = () => {
+  const [applications, setApplications] = useState<Application[]>(MOCK_APPLICATIONS);
   const [selectedReviewApp, setSelectedReviewApp] = useState<Application | null>(null);
   const [filters, setFilters] = useState({
     year: '',
@@ -24,12 +25,27 @@ export const PeriodicReviews = () => {
     }));
   };
 
+  const handlePhaseChange = (appId: string, newPhase: PRStatus) => {
+    setApplications(prev => prev.map(app => {
+      if (app.id === appId) {
+        return {
+          ...app,
+          prStatus: newPhase,
+          prHistory: app.prHistory?.map((h, idx) => idx === 0 ? { ...h, status: newPhase } : h) || []
+        };
+      }
+      return app;
+    }));
+  };
+
   const filteredApps = useMemo(() => {
-    return MOCK_APPLICATIONS.filter(app => {
+    return applications.filter(app => {
       const appYear = app.prHistory?.[0]?.year?.toString() || (app.lastAuditDate ? app.lastAuditDate.substring(0, 4) : '');
       const matchYear = !filters.year || appYear === filters.year;
       const matchDivision = !filters.division || app.division === filters.division;
-      const matchStatus = !filters.prStatus || app.prStatus === filters.prStatus;
+      const matchStatus = !filters.prStatus || 
+        app.prStatus === filters.prStatus || 
+        (filters.prStatus === 'Pending' && ['To be Initiated', 'In Progress', 'In Review'].includes(app.prStatus));
       const searchLower = filters.search.toLowerCase();
       const matchSearch = !filters.search || 
         app.name.toLowerCase().includes(searchLower) || 
@@ -38,10 +54,12 @@ export const PeriodicReviews = () => {
       
       return matchYear && matchDivision && matchSearch && matchStatus;
     });
-  }, [filters]);
+  }, [applications, filters]);
 
   if (selectedReviewApp) {
-    return <InitiatePeriodicReview application={selectedReviewApp} onBack={() => setSelectedReviewApp(null)} />;
+    // Pass the latest application data from state
+    const currentApp = applications.find(a => a.id === selectedReviewApp.id) || selectedReviewApp;
+    return <InitiatePeriodicReview application={currentApp} onBack={() => setSelectedReviewApp(null)} />;
   }
 
   return (
@@ -163,13 +181,13 @@ export const PeriodicReviews = () => {
             <thead>
               <tr className="bg-slate-50/30 border-b border-slate-50">
                 <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">System</th>
-                <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Review Owner & Division</th>
+                <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Review Owner & Functional Area</th>
                 <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Last review Date</th>
                 <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Next Due Date</th>
                 <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">Reference Year</th>
                 <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">Review Phase</th>
                 <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">No of Observation</th>
-                <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Milestone Date</th>
+                <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Target Completion Date</th>
                 <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right font-display">Navigation</th>
               </tr>
             </thead>
@@ -180,7 +198,7 @@ export const PeriodicReviews = () => {
                   <div>
                     <p className="text-sm font-bold text-slate-900 group-hover:text-merck-indigo transition-colors font-display">{app.name}</p>
                     <div className="flex items-center mt-1 space-x-2">
-                      <span className="text-[10px] font-mono font-bold text-slate-400 opacity-70 tracking-tight">ID: {app.id}</span>
+                      <span className="text-[10px] font-mono font-bold text-slate-400 opacity-70 tracking-tight">BSN ID: {app.id}</span>
                       <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-bold text-[9px] uppercase tracking-tighter">RDID: {app.rdid}</span>
                     </div>
                   </div>
@@ -211,9 +229,24 @@ export const PeriodicReviews = () => {
                     </span>
                   </td>
                   <td className="px-8 py-5 text-center">
-                    <Badge variant={app.prStatus === 'Completed' ? 'success' : app.prStatus === 'Pending' ? 'info' : 'danger'} className="px-3 py-1 font-display uppercase text-[10px]">
-                      {app.prStatus}
-                    </Badge>
+                    <select
+                      value={app.prStatus}
+                      onChange={(e) => handlePhaseChange(app.id, e.target.value as PRStatus)}
+                      className={cn(
+                        "appearance-none inline-flex items-center px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border text-center font-display cursor-pointer focus:outline-none focus:ring-2 focus:ring-merck-indigo/20 transition-all text-center",
+                        app.prStatus === 'Completed' ? 'bg-merck-green/8 text-merck-green border-merck-green/15 focus:ring-merck-green/30' :
+                        app.prStatus === 'In Progress' ? 'bg-merck-indigo/6 text-merck-indigo border-merck-indigo/12 focus:ring-merck-indigo/30' :
+                        app.prStatus === 'In Review' ? 'bg-orange-50 text-orange-600 border-orange-200/50 focus:ring-orange-200/30' :
+                        app.prStatus === 'To be Initiated' ? 'bg-slate-50 text-slate-500 border-slate-200/50 focus:ring-slate-200/30' :
+                        'bg-merck-magenta/8 text-merck-magenta border-merck-magenta/15 focus:ring-merck-magenta/30' // Overdue
+                      )}
+                    >
+                      <option value="To be Initiated">To be Initiated</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="In Review">In Review</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Overdue">Overdue</option>
+                    </select>
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex flex-col space-y-1 text-[10px] font-bold">

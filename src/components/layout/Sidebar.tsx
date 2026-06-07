@@ -127,13 +127,7 @@ export const Sidebar = ({ activeSection, setActiveSection, collapsed, onToggle }
           onClick={() => setActiveSection('audits')}
           collapsed={collapsed}
         />
-        <SidebarItem 
-          icon={FileText} 
-          label="Global Reports" 
-          active={activeSection === 'reports'} 
-          onClick={() => setActiveSection('reports')}
-          collapsed={collapsed}
-        />
+
 
         {!collapsed && <div className="mx-4 my-3 h-px bg-slate-100" />}
         {collapsed && <div className="mx-3 my-3 h-px bg-slate-100" />}

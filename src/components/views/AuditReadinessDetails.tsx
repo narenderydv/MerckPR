@@ -45,7 +45,13 @@ export const AuditReadinessDetails = ({ application, onBack }: AuditReadinessDet
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">PR Status</p>
           <p className="text-lg font-bold text-slate-900">{application.prStatus}</p>
-          <Badge className="mt-2" variant={application.prStatus === 'Completed' ? 'success' : application.prStatus === 'Pending' ? 'info' : 'danger'}>
+          <Badge className="mt-2" variant={
+            application.prStatus === 'Completed' ? 'success' :
+            application.prStatus === 'In Progress' ? 'info' :
+            application.prStatus === 'In Review' ? 'warning' :
+            application.prStatus === 'To be Initiated' ? 'neutral' :
+            'danger'
+          }>
             {application.prStatus}
           </Badge>
         </div>

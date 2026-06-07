@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, User, Menu, ChevronRight, LogOut, Settings, Clock } from 'lucide-react';
+import { Bell, User, Menu, ChevronRight, LogOut, Settings, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -60,15 +60,7 @@ export const Header = ({ onMenuToggle, title, breadcrumb }: HeaderProps) => {
       </div>
 
       <div className="flex items-center space-x-5">
-        {/* Search */}
-        <div className="relative hidden lg:block group">
-          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-merck-indigo transition-colors" strokeWidth={1.8} />
-          <input 
-            type="text" 
-            placeholder="Search systems, IDs, audits..." 
-            className="pl-11 pr-5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm w-80 focus:outline-none focus:ring-2 focus:ring-merck-indigo/10 focus:bg-white focus:border-merck-indigo/15 transition-all font-medium placeholder:text-slate-300"
-          />
-        </div>
+
 
         <div className="flex items-center space-x-3">
           {/* Notifications */}

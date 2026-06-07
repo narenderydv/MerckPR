@@ -19,7 +19,7 @@ const buildRows = () => {
     const totalObs = app.observations.length;
     const closedObs = app.observations.filter(o => o.status === 'Closed').length;
     const correctness = totalObs > 0 ? Math.round((closedObs / totalObs) * 100) : 100;
-    const completeness = app.prStatus === 'Completed' ? 100 : app.prStatus === 'Pending' ? 60 : 30;
+    const completeness = app.prStatus === 'Completed' ? 100 : ['In Progress', 'In Review'].includes(app.prStatus) ? 60 : app.prStatus === 'To be Initiated' ? 10 : 30;
     const overallCompliance = Math.round((correctness + completeness) / 2);
 
     // Most critical observation

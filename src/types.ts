@@ -3,7 +3,7 @@ export type Criticality = 'Critical' | 'Major' | 'Minor';
 export type ObservationStatus = 'Open' | 'Closed' | 'In Progress';
 export type AuditType = 'Internal' | 'External';
 export type AuditOutcome = 'No Findings' | 'Minor Findings' | 'Major Findings' | 'Critical Findings';
-export type PRStatus = 'Completed' | 'Pending' | 'Overdue';
+export type PRStatus = 'To be Initiated' | 'In Progress' | 'In Review' | 'Completed' | 'Overdue';
 
 export interface Observation {
   id: string;
