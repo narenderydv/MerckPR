@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { MOCK_APPLICATIONS } from '../../constants/mockData';
-import { Download, Search, Calendar, X, ChevronDown, ArrowRight } from 'lucide-react';
+import { Download, Search, Calendar, X, ChevronDown, ArrowRight, Activity, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { cn } from '../../lib/utils';
 import { Application } from '../../types';
 import { AuditReadinessDetails } from './AuditReadinessDetails';
 import { motion } from 'motion/react';
+import { StatCard } from '../dashboard/StatCard';
+import { DASHBOARD_STATS } from '../../constants/dashboardData';
 
 // Build flat audit-readiness rows from mock data
 const buildRows = () => {
@@ -36,6 +38,9 @@ const buildRows = () => {
       lastAuditDate: app.lastAuditDate,
       overallCompliance,
       observations: totalObs,
+      criticals,
+      majors,
+      minors,
       criticality: topCriticality,
       category: hasGoLive ? 'Run' : 'Project',
       division: app.division,
@@ -51,6 +56,8 @@ export const AuditLogRegistry = () => {
   const [dateTo, setDateTo] = useState('');
   const [catFilter, setCatFilter] = useState('');
   const [critFilter, setCritFilter] = useState('');
+  const [reviewFilter, setReviewFilter] = useState<string>('');
+  const [domainFilter, setDomainFilter] = useState<string>('');
 
   const allRows = useMemo(() => buildRows(), []);
 
@@ -74,15 +81,66 @@ export const AuditLogRegistry = () => {
       // Criticality
       const matchCrit = !critFilter || r.criticality === critFilter;
 
-      return matchSearch && matchFrom && matchTo && matchCat && matchCrit;
+      // Review Filter
+      const matchReview = !reviewFilter || r.originalApp.prStatus === 'Completed';
+
+      // Domain filter
+      let matchDomain = true;
+      if (domainFilter === 'CMS') {
+        matchDomain = r.originalApp.subDivision.toLowerCase().includes('cms');
+      } else if (domainFilter === 'Platform') {
+        matchDomain = r.originalApp.subDivision.toLowerCase().includes('platform');
+      } else if (domainFilter === 'GDO') {
+        matchDomain = r.originalApp.subDivision.toLowerCase().includes('gdo');
+      } else if (domainFilter === 'Others') {
+        const sub = r.originalApp.subDivision.toLowerCase();
+        matchDomain = !sub.includes('cms') && !sub.includes('platform') && !sub.includes('gdo');
+      }
+
+      return matchSearch && matchFrom && matchTo && matchCat && matchCrit && matchReview && matchDomain;
     });
-  }, [allRows, searchText, dateFrom, dateTo, catFilter, critFilter]);
+  }, [allRows, searchText, dateFrom, dateTo, catFilter, critFilter, reviewFilter, domainFilter]);
+
+  const domainSummary = useMemo(() => {
+    const cms: typeof allRows = [];
+    const platform: typeof allRows = [];
+    const gdo: typeof allRows = [];
+    const others: typeof allRows = [];
+
+    allRows.forEach(r => {
+      const sub = r.originalApp.subDivision.toLowerCase();
+      if (sub.includes('cms')) {
+        cms.push(r);
+      } else if (sub.includes('platform')) {
+        platform.push(r);
+      } else if (sub.includes('gdo')) {
+        gdo.push(r);
+      } else {
+        others.push(r);
+      }
+    });
+
+    const getAvgComp = (arr: typeof allRows) => {
+      if (arr.length === 0) return 100;
+      return Math.round(arr.reduce((sum, item) => sum + item.overallCompliance, 0) / arr.length);
+    };
+
+    const compliantOthers = others.filter(r => r.overallCompliance >= 80).length;
+    const needsActionOthers = others.length - compliantOthers;
+
+    return {
+      cms: { count: cms.length, compliance: getAvgComp(cms) },
+      platform: { count: platform.length, compliance: getAvgComp(platform) },
+      gdo: { count: gdo.length, compliance: getAvgComp(gdo) },
+      others: { count: others.length, compliant: compliantOthers, needsAction: needsActionOthers }
+    };
+  }, [allRows]);
 
   const handleExport = () => {
-    const headers = ['App ID', 'System Name', 'System Owner', 'Go Live Date', 'Last Audit Date', 'Overall Compliance %', 'Observations', 'Criticality', 'Category'];
+    const headers = ['App ID', 'System Name', 'System Owner', 'Go Live Date', 'Last Audit Date', 'Overall Compliance %', 'Observations', 'Criticality', 'Category', 'Comments'];
     const csvRows = [headers.join(',')];
     filteredRows.forEach(r => {
-      csvRows.push([r.appId, `"${r.name}"`, `"${r.owner}"`, r.goLiveDate, r.lastAuditDate, r.overallCompliance, r.observations, r.criticality, r.category].join(','));
+      csvRows.push([r.appId, `"${r.name}"`, `"${r.owner}"`, r.goLiveDate, r.lastAuditDate, r.overallCompliance, r.observations, r.criticality, r.category, '""'].join(','));
     });
     const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -93,7 +151,7 @@ export const AuditLogRegistry = () => {
     URL.revokeObjectURL(url);
   };
 
-  const hasActiveFilters = searchText || dateFrom || dateTo || catFilter || critFilter;
+  const hasActiveFilters = searchText || dateFrom || dateTo || catFilter || critFilter || reviewFilter || domainFilter;
 
   const clearAll = () => {
     setSearchText('');
@@ -101,6 +159,8 @@ export const AuditLogRegistry = () => {
     setDateTo('');
     setCatFilter('');
     setCritFilter('');
+    setReviewFilter('');
+    setDomainFilter('');
   };
 
   if (selectedAuditApp) {
@@ -120,6 +180,42 @@ export const AuditLogRegistry = () => {
           <Download className="w-3.5 h-3.5 opacity-50" strokeWidth={1.8} />
           Export CSV
         </button>
+      </div>
+
+      {/* Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard 
+          label="CMS" 
+          value={`${domainSummary.cms.compliance}%`}
+          icon={Activity}
+          description={`${domainSummary.cms.count} Systems`}
+          onClick={() => setDomainFilter(prev => prev === 'CMS' ? '' : 'CMS')}
+          isActive={domainFilter === 'CMS'}
+        />
+        <StatCard 
+          label="Platform" 
+          value={`${domainSummary.platform.compliance}%`} 
+          icon={CheckCircle2}
+          description={`${domainSummary.platform.count} Systems`}
+          onClick={() => setDomainFilter(prev => prev === 'Platform' ? '' : 'Platform')}
+          isActive={domainFilter === 'Platform'}
+        />
+        <StatCard 
+          label="GDO" 
+          value={`${domainSummary.gdo.compliance}%`} 
+          icon={Clock}
+          description={`${domainSummary.gdo.count} Systems`}
+          onClick={() => setDomainFilter(prev => prev === 'GDO' ? '' : 'GDO')}
+          isActive={domainFilter === 'GDO'}
+        />
+        <StatCard 
+          label="EMS & Others" 
+          value={`${domainSummary.others.count} Systems`} 
+          icon={AlertCircle}
+          description={`Compliant: ${domainSummary.others.compliant} | Action: ${domainSummary.others.needsAction}`}
+          onClick={() => setDomainFilter(prev => prev === 'Others' ? '' : 'Others')}
+          isActive={domainFilter === 'Others'}
+        />
       </div>
 
       {/* Filters */}
@@ -190,9 +286,9 @@ export const AuditLogRegistry = () => {
             </select>
           </div>
 
-          {/* Criticality */}
+          {/* System Criticality */}
           <div>
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Criticality</label>
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">System Criticality</label>
             <select
               value={critFilter}
               onChange={e => setCritFilter(e.target.value)}
@@ -232,7 +328,17 @@ export const AuditLogRegistry = () => {
             )}
             {critFilter && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-merck-magenta/5 text-merck-magenta text-[10px] font-bold border border-merck-magenta/10">
-                Criticality: {critFilter} <button onClick={() => setCritFilter('')} className="ml-1"><X className="w-3 h-3" /></button>
+                System Criticality: {critFilter} <button onClick={() => setCritFilter('')} className="ml-1"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+            {reviewFilter && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-merck-indigo/5 text-merck-indigo text-[10px] font-bold border border-merck-indigo/10">
+                Status: Reviewed <button onClick={() => setReviewFilter('')} className="ml-1"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+            {domainFilter && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-merck-indigo/5 text-merck-indigo text-[10px] font-bold border border-merck-indigo/10">
+                Domain: {domainFilter} <button onClick={() => setDomainFilter('')} className="ml-1"><X className="w-3 h-3" /></button>
               </span>
             )}
           </div>
@@ -249,13 +355,14 @@ export const AuditLogRegistry = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/30 border-b border-slate-50">
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">App ID</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">System Owner</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">App ID / System</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Process Owner</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Functional Area</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">System Criticality</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Go Live Date</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Last Audit Date</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">Overall Compliance</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">Observations</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">Criticality</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Observations</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">Category</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display text-center">Action</th>
               </tr>
@@ -269,6 +376,18 @@ export const AuditLogRegistry = () => {
                   </td>
                   <td className="px-6 py-5">
                     <span className="text-xs font-bold text-slate-700">{r.owner}</span>
+                  </td>
+                  <td className="px-6 py-5">
+                    <span className="text-xs font-semibold text-merck-indigo">{r.division}</span>
+                  </td>
+                  <td className="px-6 py-5 text-center">
+                    <Badge variant={
+                      r.criticality === 'Critical' ? 'danger' :
+                      r.criticality === 'Major' ? 'warning' :
+                      r.criticality === 'Minor' ? 'info' : 'success'
+                    } className="px-2.5 py-0.5 text-[9px] uppercase tracking-wider">
+                      {r.criticality}
+                    </Badge>
                   </td>
                   <td className="px-6 py-5">
                     <span className="text-xs font-bold text-slate-600">{r.goLiveDate || '—'}</span>
@@ -290,23 +409,34 @@ export const AuditLogRegistry = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-center">
-                    {r.observations > 0 ? (
-                      <span className="flex items-center justify-center w-7 h-7 rounded-full bg-merck-magenta/10 text-merck-magenta text-xs font-bold border border-merck-magenta/20 mx-auto">
-                        {r.observations}
-                      </span>
-                    ) : (
-                      <span className="text-slate-300 text-xs font-bold">0</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-5 text-center">
-                    <Badge variant={
-                      r.criticality === 'Critical' ? 'danger' :
-                      r.criticality === 'Major' ? 'warning' :
-                      r.criticality === 'Minor' ? 'info' : 'success'
-                    } className="px-2.5 py-0.5 text-[9px] uppercase tracking-wider">
-                      {r.criticality}
-                    </Badge>
+                  <td className="px-6 py-5">
+                    <div className="flex flex-col space-y-1 text-[10px] font-bold min-w-[95px]">
+                      <div className="flex justify-between items-center w-full">
+                        <span className="text-slate-500 uppercase tracking-wider">Total:</span>
+                        <span className="text-slate-800 bg-slate-100 px-1.5 rounded">{r.observations}</span>
+                      </div>
+                      <div className="flex justify-between items-center w-full">
+                        <span className="text-slate-500 uppercase tracking-wider">High:</span>
+                        <span className={cn(
+                          "px-1.5 rounded",
+                          r.criticals > 0 ? "text-merck-magenta bg-merck-magenta/10" : "text-slate-400 bg-slate-50"
+                        )}>{r.criticals}</span>
+                      </div>
+                      <div className="flex justify-between items-center w-full">
+                        <span className="text-slate-500 uppercase tracking-wider">Medium:</span>
+                        <span className={cn(
+                          "px-1.5 rounded",
+                          r.majors > 0 ? "text-amber-600 bg-amber-500/10" : "text-slate-400 bg-slate-50"
+                        )}>{r.majors}</span>
+                      </div>
+                      <div className="flex justify-between items-center w-full">
+                        <span className="text-slate-500 uppercase tracking-wider">Low:</span>
+                        <span className={cn(
+                          "px-1.5 rounded",
+                          r.minors > 0 ? "text-merck-cyan bg-merck-cyan/10" : "text-slate-400 bg-slate-50"
+                        )}>{r.minors}</span>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-5 text-center">
                     <span className={cn(
@@ -328,7 +458,7 @@ export const AuditLogRegistry = () => {
               ))}
               {filteredRows.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
+                  <td colSpan={10} className="px-6 py-12 text-center">
                     <p className="text-sm text-slate-400 font-medium">No systems match the selected filters.</p>
                   </td>
                 </tr>

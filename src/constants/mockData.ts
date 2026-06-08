@@ -59,7 +59,17 @@ export const MOCK_APPLICATIONS: Application[] = [
     lastAuditType: 'Internal',
     lastAuditOutcome: 'No Findings',
     prStatus: 'Completed',
-    observations: [],
+    observations: [
+      {
+        id: 'OBS-03',
+        type: 'Audit',
+        criticality: 'Minor',
+        status: 'Closed',
+        description: 'Document signature configuration setting had an incorrect timestamp offset.',
+        dueDate: '2026-04-10',
+        owner: 'Sarah Connor'
+      }
+    ],
     auditHistory: [
       { id: 'AUD-105', date: '2026-01-05', type: 'Internal', outcome: 'No Findings', auditor: 'Internal QA', observations: 0 }
     ],
@@ -115,7 +125,17 @@ export const MOCK_APPLICATIONS: Application[] = [
     lastAuditType: 'Internal',
     lastAuditOutcome: 'No Findings',
     prStatus: 'Completed',
-    observations: [],
+    observations: [
+      {
+        id: 'OBS-04',
+        type: 'PR',
+        criticality: 'Minor',
+        status: 'Closed',
+        description: 'Routine backup logs for November 2025 were stored on a secondary server before confirmation.',
+        dueDate: '2026-03-15',
+        owner: 'Marcus Aurelius'
+      }
+    ],
     auditHistory: [],
     prHistory: [{ year: 2026, status: 'Completed', observationsCount: 0 }],
     capas: []
@@ -161,7 +181,17 @@ export const MOCK_APPLICATIONS: Application[] = [
     lastAuditType: 'Internal',
     lastAuditOutcome: 'Minor Findings',
     prStatus: 'To be Initiated',
-    observations: [],
+    observations: [
+      {
+        id: 'OBS-05',
+        type: 'Audit',
+        criticality: 'Major',
+        status: 'Open',
+        description: 'Insufficient encryption key rotation policy document approval signature.',
+        dueDate: '2026-08-30',
+        owner: 'Natasha Romanoff'
+      }
+    ],
     auditHistory: [],
     prHistory: [{ year: 2026, status: 'To be Initiated', observationsCount: 1 }],
     capas: []
